@@ -8,15 +8,15 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type",
 }
 
-export async function POST(request: NextRequest, { params }: { params: { embedCode: string } }) {
-  const { embedCode } = await params // Add this line - you forgot to await params
+export async function POST(request: NextRequest, { params }: { params: Promise<{ embedCode: string }> }) {
+  const { embedCode } = await params
 
   try {
     const { message, sessionId } = await request.json()
 
     if (!message || !sessionId) {
       return NextResponse.json(
-        { error: "Message and sessionId are required" }, 
+        { error: "Message and sessionId are required" },
         { status: 400, headers: corsHeaders }
       )
     }
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest, { params }: { params: { embedCo
 
     if (!chatbot || !chatbot.isActive) {
       return NextResponse.json(
-        { error: "Chatbot not found or inactive" }, 
+        { error: "Chatbot not found or inactive" },
         { status: 404, headers: corsHeaders }
       )
     }
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest, { params }: { params: { embedCo
       {
         name: chatbot.name,
         welcomeMessage: chatbot.welcomeMessage,
-        businessContext: chatbot.user.businessName || undefined,
+        businessContext: chatbot.user.businessName || undefined as any,
       },
       conversationHistory,
     )
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest, { params }: { params: { embedCo
   } catch (error) {
     console.error("Chat API error:", error)
     return NextResponse.json(
-      { error: "Internal server error" }, 
+      { error: "Internal server error" },
       { status: 500, headers: corsHeaders }
     )
   }

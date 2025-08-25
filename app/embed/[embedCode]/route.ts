@@ -2,7 +2,8 @@ import { type NextRequest, NextResponse } from "next/server"
 import { readFile } from "fs/promises"
 import { join } from "path"
 
-export async function GET(request: NextRequest, { params }: { params: { embedCode: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ embedCode: string }> }) {
+  const { embedCode } = await params
   try {
     // Read the embed template
     const templatePath = join(process.cwd(), "public", "embed-template.js")

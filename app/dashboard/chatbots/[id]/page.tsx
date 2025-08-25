@@ -36,7 +36,7 @@ async function getChatbot(chatbotId: string, userId: string) {
 export default async function ChatbotDetailPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
   const { id } = await params;
   console.log(id)

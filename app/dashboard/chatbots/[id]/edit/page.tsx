@@ -16,10 +16,11 @@ async function getChatbot(chatbotId: string, userId: string) {
 export default async function EditChatbotPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const { id } = await params
   const session = await auth()
-  const chatbot = await getChatbot(params.id, session!.user.id)
+  const chatbot = await getChatbot(id, session!.user.id)
 
   if (!chatbot) {
     notFound()
