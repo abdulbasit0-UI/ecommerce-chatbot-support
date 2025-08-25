@@ -11,34 +11,38 @@ export async function generateChatResponse(
   chatbotConfig: {
     name: string
     welcomeMessage: string
-    businessContext?: string
   },
   conversationHistory: Array<{ role: "user" | "assistant"; content: string }> = [],
 ) {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
-    // Create system prompt for ecommerce context
-    const systemPrompt = `You are ${chatbotConfig.name}, an AI customer support assistant for an ecommerce business. 
+    // Custom system prompt for UmarTech Computer Store
+    const systemPrompt = `You are ${chatbotConfig.name}, an AI assistant for **UmarTech Computer Store** in Durban, South Africa. 
+Address: Shop No. 4, Joe Slovo Street, Durban Central  
+Phone: +27 31 3011 446  
+Email: info@umartech.co.za  
 
 Your role:
-- Provide helpful, friendly, and professional customer support
-- Answer questions about products, orders, shipping, returns, and general inquiries
-- Be concise but thorough in your responses
-- If you don't know something specific about the business, politely ask for clarification or suggest contacting human support
-- Always maintain a helpful and positive tone
-- Focus on solving customer problems and providing excellent service
+- Provide friendly, professional customer support
+- Help with inquiries about computers, laptops, and electronics for sale
+- Provide guidance on laptop repair services
+- Answer questions about printer toners, printing, and copying services
+- Share store location and contact details when asked
+- If unsure about a specific service, politely suggest contacting human support
+- Keep responses clear, helpful, and customer-focused
 
-Business context: ${chatbotConfig.businessContext || "General ecommerce business"}
+Business context: UmarTech sells computers, laptops, electronics, printer toners, and provides repair, copying, and printing services in Durban, South Africa.
 
 Welcome message: "${chatbotConfig.welcomeMessage}"
 
 Guidelines:
 - Keep responses under 200 words when possible
 - Use bullet points for lists or multiple items
-- Be empathetic to customer concerns
-- Offer to escalate to human support when needed
-- Don't make promises about specific policies unless you're certain`
+- Be empathetic and solution-oriented
+- Escalate to human support when necessary
+- Only provide business-specific details you are certain about (otherwise ask customer to call or email)`
+
 
     // Build conversation history
     let conversationText = systemPrompt + "\n\nConversation:\n"
@@ -61,7 +65,7 @@ Guidelines:
     console.error("Gemini API error:", error)
     return {
       success: false,
-      message: "I'm sorry, I'm having trouble responding right now. Please try again or contact our support team.",
+      message: "I'm sorry, I'm having trouble responding right now. Please try again or contact UmarTech directly at +27 31 3011 446 or info@umartech.co.za.",
       error: error instanceof Error ? error.message : "Unknown error",
     }
   }

@@ -21,6 +21,48 @@
     return "session_" + Math.random().toString(36).substr(2, 9) + "_" + Date.now()
   }
 
+  // Simple Markdown parser for basic formatting
+  function parseMarkdown(text) {
+    return text
+      // Bold text: **text** or __text__
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/__(.*?)__/g, '<strong>$1</strong>')
+      
+      // Italic text: *text* or _text_
+      .replace(/\*((?!\*)(.*?))\*/g, '<em>$1</em>')
+      .replace(/_((?!_)(.*?))_/g, '<em>$1</em>')
+      
+      // Code: `text`
+      .replace(/`([^`]+)`/g, '<code style="background-color: #f3f4f6; padding: 2px 4px; border-radius: 3px; font-family: monospace; font-size: 0.9em;">$1</code>')
+      
+      // Convert newlines to line breaks, but handle lists specially
+      .split('\n')
+      .map(line => {
+        // Handle bullet points
+        if (line.trim().startsWith('* ')) {
+          return `<li style="margin-bottom: 4px;">${line.trim().substring(2)}</li>`
+        }
+        // Handle numbered lists
+        if (/^\d+\.\s/.test(line.trim())) {
+          return `<li style="margin-bottom: 4px;">${line.trim().replace(/^\d+\.\s/, '')}</li>`
+        }
+        // Regular lines
+        return line.trim() === '' ? '<br>' : line
+      })
+      .join('\n')
+      
+      // Wrap consecutive list items in ul tags
+      .replace(/(<li[^>]*>.*?<\/li>\n?)+/g, (match) => {
+        return `<ul style="margin: 8px 0; padding-left: 20px;">${match}</ul>`
+      })
+      
+      // Convert remaining newlines to br tags
+      .replace(/\n/g, '<br>')
+      
+      // Clean up extra br tags
+      .replace(/(<br>\s*){2,}/g, '<br><br>')
+  }
+
   // Create chatbot widget
   function createChatWidget() {
     // Widget container
@@ -75,8 +117,8 @@
       position: absolute;
       bottom: 80px;
       right: 0;
-      width: 350px;
-      height: 500px;
+      width: 380px;
+      height: 520px;
       background: white;
       border-radius: 12px;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
@@ -146,7 +188,17 @@
       border-radius: 6px;
       font-size: 14px;
       outline: none;
+      transition: border-color 0.2s ease;
     `
+
+    // Input focus effects
+    input.addEventListener("focus", () => {
+      input.style.borderColor = chatbotConfig.primaryColor
+    })
+
+    input.addEventListener("blur", () => {
+      input.style.borderColor = "#d1d5db"
+    })
 
     const sendButton = document.createElement("button")
     sendButton.type = "submit"
@@ -159,8 +211,18 @@
       cursor: pointer;
       font-size: 14px;
       font-weight: 500;
+      transition: background-color 0.2s ease;
     `
     sendButton.textContent = "Send"
+
+    // Send button hover effect
+    sendButton.addEventListener("mouseenter", () => {
+      sendButton.style.opacity = "0.9"
+    })
+
+    sendButton.addEventListener("mouseleave", () => {
+      sendButton.style.opacity = "1"
+    })
 
     // Event listeners
     button.addEventListener("click", toggleChat)
@@ -188,22 +250,47 @@
       display: flex;
       margin-bottom: 12px;
       ${isUser ? "justify-content: flex-end;" : "justify-content: flex-start;"}
+      animation: fadeIn 0.3s ease-in;
     `
 
     const messageBubble = document.createElement("div")
     messageBubble.style.cssText = `
-      max-width: 80%;
-      padding: 10px 14px;
+      max-width: 85%;
+      padding: 12px 16px;
       border-radius: 12px;
       font-size: 14px;
-      line-height: 1.4;
+      line-height: 1.5;
+      word-wrap: break-word;
       ${
         isUser
           ? `background-color: ${chatbotConfig.primaryColor}; color: white; border-bottom-right-radius: 4px;`
-          : "background-color: white; color: #374151; border: 1px solid #e5e7eb; border-bottom-left-radius: 4px;"
+          : "background-color: white; color: #374151; border: 1px solid #e5e7eb; border-bottom-left-radius: 4px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);"
       }
     `
-    messageBubble.textContent = content
+
+    // For bot messages, parse markdown; for user messages, use plain text
+    if (isUser) {
+      messageBubble.textContent = content
+    } else {
+      messageBubble.innerHTML = parseMarkdown(content)
+      
+      // Style lists and other elements within bot messages
+      const lists = messageBubble.querySelectorAll('ul')
+      lists.forEach(list => {
+        list.style.marginTop = '8px'
+        list.style.marginBottom = '8px'
+      })
+
+      const strongElements = messageBubble.querySelectorAll('strong')
+      strongElements.forEach(strong => {
+        strong.style.fontWeight = '600'
+      })
+
+      const emElements = messageBubble.querySelectorAll('em')
+      emElements.forEach(em => {
+        em.style.fontStyle = 'italic'
+      })
+    }
 
     messageDiv.appendChild(messageBubble)
     return messageDiv
@@ -211,11 +298,26 @@
 
   function toggleChat() {
     const chatWindow = document.getElementById("chatbot-pro-window")
+    const button = document.getElementById("chatbot-pro-button")
+    
     isOpen = !isOpen
     chatWindow.style.display = isOpen ? "flex" : "none"
 
+    // Animate button
     if (isOpen) {
+      button.innerHTML = `
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      `
       document.getElementById("chatbot-pro-input").focus()
+    } else {
+      button.innerHTML = `
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+      `
     }
   }
 
@@ -275,15 +377,16 @@
 
   function createLoadingMessage() {
     const messageDiv = document.createElement("div")
-    messageDiv.style.cssText = "display: flex; margin-bottom: 12px; justify-content: flex-start;"
+    messageDiv.style.cssText = "display: flex; margin-bottom: 12px; justify-content: flex-start; animation: fadeIn 0.3s ease-in;"
 
     const messageBubble = document.createElement("div")
     messageBubble.style.cssText = `
-      padding: 10px 14px;
+      padding: 12px 16px;
       border-radius: 12px;
       background-color: white;
       border: 1px solid #e5e7eb;
       border-bottom-left-radius: 4px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     `
 
     messageBubble.innerHTML = `
@@ -311,12 +414,51 @@
 
       chatbotConfig = config
 
-      // Add CSS animations
+      // Add CSS animations and styles
       const style = document.createElement("style")
       style.textContent = `
         @keyframes pulse {
           0%, 80%, 100% { opacity: 0.3; }
           40% { opacity: 1; }
+        }
+        
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Smooth scrollbar for messages */
+        #chatbot-pro-messages::-webkit-scrollbar {
+          width: 6px;
+        }
+        
+        #chatbot-pro-messages::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 3px;
+        }
+        
+        #chatbot-pro-messages::-webkit-scrollbar-thumb {
+          background: #c1c1c1;
+          border-radius: 3px;
+        }
+        
+        #chatbot-pro-messages::-webkit-scrollbar-thumb:hover {
+          background: #a8a8a8;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 480px) {
+          #chatbot-pro-widget {
+            bottom: 10px;
+            right: 10px;
+          }
+          
+          #chatbot-pro-window {
+            width: calc(100vw - 20px);
+            height: calc(100vh - 100px);
+            bottom: 70px;
+            right: -10px;
+          }
         }
       `
       document.head.appendChild(style)
