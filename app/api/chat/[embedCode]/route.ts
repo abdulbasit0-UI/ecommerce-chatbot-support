@@ -81,7 +81,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       {
         name: chatbot.name,
         welcomeMessage: chatbot.welcomeMessage,
-        businessContext: chatbot.user.businessName || undefined as any,
+        // businessContext: chatbot.user.businessName || undefined as any,
       },
       conversationHistory,
     )
