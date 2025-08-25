@@ -78,7 +78,7 @@ export default async function DashboardPage() {
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
           <div className="col-span-4">
-            <RecentActivity activities={data.recentActivities} />
+            <RecentActivity activities={data.recentActivities as any} />
           </div>
           <div className="col-span-3">
             <Card>

@@ -125,7 +125,7 @@ export function ChatbotForm({ chatbot, isEditing = false }: ChatbotFormProps) {
                   <Input
                     placeholder="#8B4513"
                     value={selectedColor}
-                    onChange={(e) => handleColorSelect(e.target.value)}
+                    // onChange={(e) => handleColorSelect(e.target.value)}
                     {...register("primaryColor")}
                     className="flex-1"
                   />

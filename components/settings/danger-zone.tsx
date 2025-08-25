@@ -31,6 +31,10 @@ export function DangerZone() {
     formState: { errors },
   } = useForm<DeleteAccountData>({
     resolver: zodResolver(deleteAccountSchema),
+    defaultValues: {
+      confirmText: "DELETE",
+      password: "",
+    },
   })
 
   const onSubmit = async (data: DeleteAccountData) => {

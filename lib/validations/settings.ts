@@ -18,13 +18,12 @@ export const passwordSchema = z
     path: ["confirmPassword"],
   })
 
-export const deleteAccountSchema = z.object({
-  confirmText: z.string().refine((val) => val === "DELETE", {
-    message: "Please type DELETE to confirm",
-  }),
-  password: z.string().min(6, "Password is required"),
-})
 
+  export const deleteAccountSchema = z.object({
+    confirmText: z.string(),
+    password: z.string().min(1, "Password is required"),
+  })
+  
+export type DeleteAccountData = z.infer<typeof deleteAccountSchema>;
 export type ProfileData = z.infer<typeof profileSchema>
 export type PasswordData = z.infer<typeof passwordSchema>
-export type DeleteAccountData = z.infer<typeof deleteAccountSchema>
